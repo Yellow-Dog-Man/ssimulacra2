@@ -30,7 +30,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: ssimulacra2-linux
-        path: ./ssimulacra2
+        path: ./build/ssimulacra2
   build_windows:
     name: Windows MSYS2 / ${{ matrix.msystem }}
     runs-on: windows-latest
@@ -73,4 +73,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ssimulacra2-windows-${{ matrix.msystem }}
-          path: ./ssimulacra2.exe
+          path: ./build/ssimulacra2.exe

@@ -6,10 +6,7 @@ cmake ../src -G Ninja
 
 if ninja ssimulacra2
 then
-  strip ssimulacra2*
-  ls *
   cd ..
-  cp build/ssimulacra2 .
 else
   echo "Build problem. Check for missing dependencies?"
   echo "Try installing dependencies:"
