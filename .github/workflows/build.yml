@@ -31,3 +31,45 @@ jobs:
       with:
         name: ssimulacra2-linux
         path: ./ssimulacra2
+  build_windows:
+    name: Windows MSYS2 / ${{ matrix.msystem }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+         - msystem: mingw64
+         - msystem: mingw32
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout the source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+          fetch-depth: 1
+
+      - uses: msys2/setup-msys2@07aeda7763550b267746a772dcea5e5ac3340b36 # v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          path-type: inherit
+          install: >-
+            base-devel
+            git
+            procps
+          pacboy: >-
+            brotli:p
+            cmake:p
+            gtest:p
+            libjpeg-turbo:p
+            ninja:p
+            toolchain:p
+
+      - name: Build
+        run: bash build_ssimulacra
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ssimulacra2-windows-${{ matrix.msystem }}
+          path: ./ssimulacra2
