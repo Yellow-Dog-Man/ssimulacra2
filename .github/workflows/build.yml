@@ -39,7 +39,6 @@ jobs:
       matrix:
         include:
          - msystem: mingw64
-         - msystem: mingw32
     defaults:
       run:
         shell: msys2 {0}
@@ -60,12 +59,12 @@ jobs:
             git
             procps
           pacboy: >-
-            brotli:p
             cmake:p
             gtest:p
             libjpeg-turbo:p
             ninja:p
             toolchain:p
+            highway:p
 
       - name: Build
         run: bash build_ssimulacra
