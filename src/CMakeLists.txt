@@ -193,8 +193,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 add_subdirectory(lib)
 
 # The actual ssimulacra 2 implementation
-target_link_libraries(ssimulacra2 jxl jxl_extras-static hwy)
 add_executable(ssimulacra2 ssimulacra2_main.cc ssimulacra2.cc)
+target_link_libraries(ssimulacra2 jxl jxl_extras-static hwy)
 add_custom_command(TARGET exe POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:ssimulacra2> $<TARGET_RUNTIME_DLLS:ssimulacra2>
   COMMAND_EXPAND_LISTS
