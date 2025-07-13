@@ -194,7 +194,7 @@ add_subdirectory(lib)
 
 # The actual ssimulacra 2 implementation
 add_executable(ssimulacra2 ssimulacra2_main.cc ssimulacra2.cc)
-target_link_libraries(ssimulacra2 jxl jxl_extras-static hwy)
+target_link_libraries(ssimulacra2 SHARED jxl jxl_extras-static hwy)
 add_custom_command(TARGET ssimulacra2 POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:ssimulacra2> $<TARGET_RUNTIME_DLLS:ssimulacra2>
   COMMAND_EXPAND_LISTS
