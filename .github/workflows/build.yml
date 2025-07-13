@@ -65,6 +65,7 @@ jobs:
             ninja:p
             toolchain:p
             highway:p
+            lcms2:p
 
       - name: Build
         run: bash build_ssimulacra
