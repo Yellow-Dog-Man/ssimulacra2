@@ -6,7 +6,7 @@ cmake ../src -G Ninja
 
 if ninja ssimulacra2
 then
-  strip ssimulacra2
+  strip ssimulacra2*
   cd ..
   cp build/ssimulacra2 .
 else
