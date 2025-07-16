@@ -1,0 +1,6 @@
+[submodule "src/third_party/highway"]
+	path = src/third_party/highway
+	url = https://github.com/google/highway.git
+[submodule "src/third_party/lcms"]
+	path = src/third_party/lcms
+	url = https://github.com/mm2/Little-CMS.git
