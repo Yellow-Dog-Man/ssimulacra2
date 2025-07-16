@@ -1,203 +1,240 @@
-# Copyright (c) the JPEG XL Project Authors. All rights reserved.
-#
-# Use of this source code is governed by a BSD-style
-# license that can be found in the LICENSE file.
-
-# Ubuntu bionic ships with cmake 3.10.
 cmake_minimum_required(VERSION 3.21)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Honor VISIBILITY_INLINES_HIDDEN on all types of targets.
-if(POLICY CMP0063)
-  cmake_policy(SET CMP0063 NEW)
-endif()
-# Pass CMAKE_EXE_LINKER_FLAGS to CC and CXX compilers when testing if they work.
-if(POLICY CMP0065)
-  cmake_policy(SET CMP0065 NEW)
-endif()
-
-# Set PIE flags for POSITION_INDEPENDENT_CODE targets, added in 3.14.
-if(POLICY CMP0083)
-  cmake_policy(SET CMP0083 NEW)
-endif()
-
-project(LIBJXL LANGUAGES C CXX)
+project(SSIMULACRA2 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles(
-   "int main() {
-      #if !defined(__EMSCRIPTEN__)
-      static_assert(false, \"__EMSCRIPTEN__ is not defined\");
-      #endif
-      return 0;
-    }"
-  JPEGXL_EMSCRIPTEN
-)
-
-message(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-fsanitize=fuzzer-no-link" CXX_FUZZERS_SUPPORTED)
-check_cxx_compiler_flag("-Xclang -mconstructor-aliases" CXX_CONSTRUCTOR_ALIASES_SUPPORTED)
-check_cxx_compiler_flag("-fmacro-prefix-map=OLD=NEW" CXX_MACRO_PREFIX_MAP)
-check_cxx_compiler_flag("-fno-rtti" CXX_NO_RTTI_SUPPORTED)
-
-# Enabled PIE binaries by default if supported.
-include(CheckPIESupported OPTIONAL RESULT_VARIABLE CHECK_PIE_SUPPORTED)
-if(CHECK_PIE_SUPPORTED)
-  check_pie_supported(LANGUAGES CXX)
-  if(CMAKE_CXX_LINK_PIE_SUPPORTED)
-    set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-  endif()
+# Set build type to Release if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(PkgConfig)
-if(NOT APPLE AND NOT WIN32 AND NOT HAIKU AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-  pkg_check_modules(TCMallocMinimalVersionCheck QUIET IMPORTED_TARGET
-      libtcmalloc_minimal)
-  if(TCMallocMinimalVersionCheck_FOUND AND
-     NOT TCMallocMinimalVersionCheck_VERSION VERSION_EQUAL 2.8.0)
-    # Enabled by default except on Windows and Apple builds for
-    # tcmalloc != 2.8.0. tcmalloc 2.8.1 already has a fix for this issue.
-    set(ENABLE_TCMALLOC_DEFAULT true)
-  else()
-    message(STATUS
-        "tcmalloc version ${TCMallocMinimalVersionCheck_VERSION} -- "
-        "tcmalloc 2.8.0 disabled due to "
-        "https://github.com/gperftools/gperftools/issues/1204")
-  endif()
+# Check if we're using vcpkg
+if(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg")
+    message(STATUS "Using vcpkg toolchain: ${CMAKE_TOOLCHAIN_FILE}")
+    set(USING_VCPKG TRUE)
+else()
+    set(USING_VCPKG FALSE)
 endif()
 
-check_cxx_source_compiles(
-   "int main() {
-      #if !defined(HWY_DISABLED_TARGETS)
-      static_assert(false, \"HWY_DISABLED_TARGETS is not defined\");
-      #endif
-      return 0;
-    }"
-  JXL_HWY_DISABLED_TARGETS_FORCED
-)
-
-set(WARNINGS_AS_ERRORS_DEFAULT false)
-
-set(BUNDLE_LIBPNG_DEFAULT NO)
-
-
-# Standard cmake naming for building shared libraries.
-get_property(SHARED_LIBS_SUPPORTED GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
-option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" false) #${SHARED_LIBS_SUPPORTED})
-
-set(JPEGXL_ENABLE_FUZZERS false CACHE BOOL
-    "Build JPEGXL fuzzer targets.")
-set(JPEGXL_ENABLE_DEVTOOLS false CACHE BOOL
-    "Build JPEGXL developer tools.")
-set(JPEGXL_ENABLE_TOOLS true CACHE BOOL
-    "Build JPEGXL user tools: cjxl and djxl.")
-set(JPEGXL_ENABLE_DOXYGEN false CACHE BOOL
-    "Generate C API documentation using Doxygen.")
-set(JPEGXL_ENABLE_MANPAGES false CACHE BOOL
-    "Build and install man pages for the command-line tools.")
-set(JPEGXL_ENABLE_BENCHMARK false CACHE BOOL
-    "Build JPEGXL benchmark tools.")
-set(JPEGXL_ENABLE_EXAMPLES false CACHE BOOL
-    "Build JPEGXL library usage examples.")
-set(JPEGXL_BUNDLE_LIBPNG false CACHE BOOL
-    "Build libpng from source and link it statically.")
-set(JPEGXL_ENABLE_JNI false CACHE BOOL
-    "Build JPEGXL JNI Java wrapper, if Java dependencies are installed.")
-set(JPEGXL_ENABLE_SJPEG false CACHE BOOL
-    "Build JPEGXL with support for encoding with sjpeg.")
-set(JPEGXL_ENABLE_OPENEXR true CACHE BOOL
-    "Build JPEGXL with support for OpenEXR if available.")
-set(JPEGXL_ENABLE_SKCMS false CACHE BOOL
-    "Build with skcms instead of lcms2.")
-set(JPEGXL_BUNDLE_SKCMS false CACHE BOOL
-    "When building with skcms, bundle it into libjxl.a.")
-set(JPEGXL_ENABLE_VIEWERS false CACHE BOOL
-    "Build JPEGXL viewer tools for evaluation.")
-set(JPEGXL_ENABLE_TCMALLOC ${ENABLE_TCMALLOC_DEFAULT} CACHE BOOL
-    "Build JPEGXL using gperftools (tcmalloc) allocator.")
-set(JPEGXL_ENABLE_PLUGINS false CACHE BOOL
-    "Build third-party plugins to support JPEG XL in other applications.")
-set(JPEGXL_ENABLE_COVERAGE false CACHE BOOL
-    "Enable code coverage tracking for libjxl. This also enables debug and disables optimizations.")
-set(JPEGXL_ENABLE_PROFILER false CACHE BOOL
-    "Builds in support for profiling (printed by tools if extra flags given)")
-set(JPEGXL_ENABLE_SIZELESS_VECTORS false CACHE BOOL
-    "Builds in support for SVE/RVV vectorization")
-set(JPEGXL_ENABLE_TRANSCODE_JPEG true CACHE BOOL
-    "Builds in support for decoding transcoded JXL files back to JPEG,\
- disabling it makes the decoder reject JXL_DEC_JPEG_RECONSTRUCTION events,\
- (default enabled)")
-set(JPEGXL_STATIC false CACHE BOOL
-    "Build tools as static binaries.")
-set(JPEGXL_WARNINGS_AS_ERRORS ${WARNINGS_AS_ERRORS_DEFAULT} CACHE BOOL
-    "Treat warnings as errors during compilation.")
-set(JPEGXL_DEP_LICENSE_DIR "" CACHE STRING
-    "Directory where to search for system dependencies \"copyright\" files.")
-set(JPEGXL_FORCE_NEON false CACHE BOOL
-    "Set flags to enable NEON in arm if not enabled by your toolchain.")
-
-
-# Force system dependencies.
-set(JPEGXL_FORCE_SYSTEM_BROTLI true CACHE BOOL
-    "Force using system installed brotli instead of third_party/brotli source.")
-set(JPEGXL_FORCE_SYSTEM_GTEST true CACHE BOOL
-    "Force using system installed googletest (gtest/gmock) instead of third_party/googletest source.")
-set(JPEGXL_FORCE_SYSTEM_LCMS2 true CACHE BOOL
-    "Force using system installed lcms2 instead of third_party/lcms source.")
-set(JPEGXL_FORCE_SYSTEM_HWY true CACHE BOOL
-    "Force using system installed highway (libhwy-dev) instead of third_party/highway source.")
-
-# Check minimum compiler versions. Older compilers are not supported and fail
-# with hard to understand errors.
-if (NOT CMAKE_C_COMPILER_ID STREQUAL CMAKE_CXX_COMPILER_ID)
-  message(FATAL_ERROR "Different C/C++ compilers set: "
-          "${CMAKE_C_COMPILER_ID} vs ${CMAKE_CXX_COMPILER_ID}")
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # Android NDK's toolchain.cmake fakes the clang version in
-  # CMAKE_CXX_COMPILER_VERSION with an incorrect number, so ignore this.
-  if (NOT CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION MATCHES "clang"
-      AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5)
-    message(FATAL_ERROR
-      "Minimum Clang version required is Clang 5, please update.")
-  endif()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
-    message(FATAL_ERROR
-      "Minimum GCC version required is 7, please update.")
-  endif()
+# Find Highway library
+if(USING_VCPKG)
+    find_package(hwy CONFIG QUIET)
+    if(hwy_FOUND)
+        message(STATUS "✓ Found Highway via vcpkg")
+        set(HWY_LIBRARIES hwy::hwy)
+        set(HWY_FOUND TRUE)
+        # Create alias for compatibility with lib/CMakeLists.txt
+        if(NOT TARGET hwy)
+            add_library(hwy ALIAS hwy::hwy)
+        endif()
+    endif()
 endif()
 
-if (CXX_NO_RTTI_SUPPORTED)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+if(NOT HWY_FOUND)
+    find_package(HWY 0.15.0 QUIET)
+    if(HWY_FOUND)
+        message(STATUS "✓ Found Highway via system")
+        set(HWY_LIBRARIES hwy)
+    endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+if(NOT HWY_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/highway/CMakeLists.txt")
+        message(STATUS "Using bundled Highway")
+        set(HWY_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(HWY_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+        add_subdirectory(third_party/highway)
+        set(HWY_LIBRARIES hwy)
+        set(HWY_FOUND TRUE)
+    else()
+        message(FATAL_ERROR "Highway library not found")
+    endif()
+endif()
 
+# Find LCMS2 library
+if(USING_VCPKG)
+    find_package(lcms2 CONFIG QUIET)
+    if(lcms2_FOUND)
+        message(STATUS "✓ Found LCMS2 via vcpkg")
+        set(LCMS2_LIBRARIES lcms2)
+        set(LCMS2_FOUND TRUE)
+    endif()
+endif()
 
-  find_package(HWY 0.15.0)
-  if (NOT HWY_FOUND)
-    message(FATAL_ERROR
-        "Highway library (hwy) not found. Install libhwy-dev or download it "
-        "from https://github.com/google/highway .")
-  endif()
-    find_package(LCMS2 2.13)
-    if ( NOT LCMS2_FOUND )
-      message(FATAL_ERROR "Please install lcms2")
-    endif ()
+if(NOT LCMS2_FOUND)
+    find_package(LCMS2 2.13 QUIET)
+    if(LCMS2_FOUND)
+        message(STATUS "✓ Found LCMS2 via system")
+    endif()
+endif()
 
+if(NOT LCMS2_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/lcms/src")
+        message(STATUS "Using bundled LCMS2")
+        add_subdirectory(third_party/lcms)
+        set(LCMS2_LIBRARIES lcms2)
+        set(LCMS2_FOUND TRUE)
+    else()
+        message(FATAL_ERROR "LCMS2 library not found")
+    endif()
+endif()
 
-# codec input, color management, image ops, etc
+# Find image format libraries
+if(USING_VCPKG)
+    # JPEG
+    find_package(libjpeg-turbo CONFIG QUIET)
+    if(libjpeg-turbo_FOUND)
+        message(STATUS "✓ Found JPEG via vcpkg (libjpeg-turbo)")
+        set(JPEG_LIBRARIES libjpeg-turbo::turbojpeg)
+        set(JPEG_FOUND TRUE)
+    endif()
+    
+    # PNG
+    find_package(PNG CONFIG QUIET)
+    if(PNG_FOUND)
+        message(STATUS "✓ Found PNG via vcpkg")
+        set(PNG_LIBRARIES PNG::PNG)
+    endif()
+    
+    # ZLIB
+    find_package(ZLIB CONFIG QUIET)
+    if(ZLIB_FOUND)
+        message(STATUS "✓ Found ZLIB via vcpkg")
+        set(ZLIB_LIBRARIES ZLIB::ZLIB)
+    endif()
+    
+    # GIF
+    find_package(unofficial-giflib CONFIG QUIET)
+    if(unofficial-giflib_FOUND)
+        message(STATUS "✓ Found GIF via vcpkg")
+        set(GIF_LIBRARIES unofficial::giflib::giflib)
+        set(GIF_FOUND TRUE)
+    endif()
+endif()
+
+# Fallback to system packages if vcpkg didn't work
+if(NOT JPEG_FOUND)
+    find_package(JPEG QUIET)
+    if(JPEG_FOUND)
+        message(STATUS "✓ Found JPEG via system")
+    endif()
+endif()
+
+if(NOT PNG_FOUND)
+    find_package(PNG QUIET)
+    if(PNG_FOUND)
+        message(STATUS "✓ Found PNG via system")
+    endif()
+endif()
+
+if(NOT ZLIB_FOUND)
+    find_package(ZLIB QUIET)
+    if(ZLIB_FOUND)
+        message(STATUS "✓ Found ZLIB via system")
+    endif()
+endif()
+
+if(NOT GIF_FOUND)
+    find_package(GIF QUIET)
+    if(GIF_FOUND)
+        message(STATUS "✓ Found GIF via system")
+    endif()
+endif()
+
+# Build the JXL library components
 add_subdirectory(lib)
 
-# The actual ssimulacra 2 implementation
-add_executable(ssimulacra2 ssimulacra2_main.cc ssimulacra2.cc)
+# Collect all image format libraries
+set(IMAGE_LIBRARIES "")
+if(JPEG_FOUND)
+    list(APPEND IMAGE_LIBRARIES ${JPEG_LIBRARIES})
+endif()
+if(PNG_FOUND)
+    list(APPEND IMAGE_LIBRARIES ${PNG_LIBRARIES})
+endif()
+if(ZLIB_FOUND)
+    list(APPEND IMAGE_LIBRARIES ${ZLIB_LIBRARIES})
+endif()
+if(GIF_FOUND)
+    list(APPEND IMAGE_LIBRARIES ${GIF_LIBRARIES})
+endif()
 
-add_custom_command(TARGET ssimulacra2 POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:ssimulacra2> $<TARGET_RUNTIME_DLLS:ssimulacra2>
-  COMMAND_EXPAND_LISTS
+# Create the SSIMULACRA2 shared library
+add_library(ssimulacra2_lib SHARED
+    ssimulacra2.cc
+    ssimulacra2_c_api.cc
 )
 
-target_link_libraries(ssimulacra2 jxl jxl_extras-static hwy)
+target_include_directories(ssimulacra2_lib PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib
+)
+
+target_link_libraries(ssimulacra2_lib 
+    jxl-static 
+    jxl_extras-static 
+    ${HWY_LIBRARIES} 
+    ${LCMS2_LIBRARIES}
+    ${IMAGE_LIBRARIES}
+)
+
+# Set library properties
+set_target_properties(ssimulacra2_lib PROPERTIES
+    OUTPUT_NAME "ssimulacra2"
+    VERSION "2.1.0"
+    SOVERSION "2"
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
+
+# Define export macro for Windows DLL
+target_compile_definitions(ssimulacra2_lib PRIVATE SSIMULACRA2_EXPORTS)
+
+# Create the executable
+add_executable(ssimulacra2_exe
+    ssimulacra2_main.cc
+    ssimulacra2.cc
+)
+
+target_include_directories(ssimulacra2_exe PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib
+)
+
+target_link_libraries(ssimulacra2_exe 
+    jxl-static 
+    jxl_extras-static 
+    ${HWY_LIBRARIES} 
+    ${LCMS2_LIBRARIES}
+    ${IMAGE_LIBRARIES}
+)
+
+set_target_properties(ssimulacra2_exe PROPERTIES
+    OUTPUT_NAME "ssimulacra2"
+)
+
+# Copy runtime DLLs on Windows
+if(WIN32)
+    add_custom_command(TARGET ssimulacra2_lib POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:ssimulacra2_lib> $<TARGET_RUNTIME_DLLS:ssimulacra2_lib>
+        COMMAND_EXPAND_LISTS
+    )
+    
+    add_custom_command(TARGET ssimulacra2_exe POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:ssimulacra2_exe> $<TARGET_RUNTIME_DLLS:ssimulacra2_exe>
+        COMMAND_EXPAND_LISTS
+    )
+endif()
+
+# Print build summary
+message(STATUS "")
+message(STATUS "SSIMULACRA2 Build Configuration:")
+message(STATUS "  Highway: ${HWY_FOUND}")
+message(STATUS "  LCMS2: ${LCMS2_FOUND}")
+message(STATUS "  JPEG: ${JPEG_FOUND}")
+message(STATUS "  PNG: ${PNG_FOUND}")
+message(STATUS "  ZLIB: ${ZLIB_FOUND}")
+message(STATUS "  GIF: ${GIF_FOUND}")
+message(STATUS "")

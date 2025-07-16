@@ -24,6 +24,8 @@ Design:
 
 #include "ssimulacra2.h"
 
+#include <cstddef>
+
 #include <stdio.h>
 
 #include <cmath>
