@@ -80,16 +80,6 @@ SSIMULACRA2_API const char* ssimulacra2_get_error_message(ssimulacra2_result res
 // Get version string
 SSIMULACRA2_API const char* ssimulacra2_get_version(void);
 
-// Get detailed diagnostic information about the last error
-// Returns a string with detailed information about what went wrong
-SSIMULACRA2_API const char* ssimulacra2_get_last_error_details(void);
-
-// Analyze image data and return diagnostic information
-// This function attempts to identify the image format and provides details
-SSIMULACRA2_API const char* ssimulacra2_analyze_image_data(
-    const unsigned char* data,
-    size_t size
-);
 
 #ifdef __cplusplus
 }
