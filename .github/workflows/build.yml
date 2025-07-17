@@ -24,53 +24,10 @@ jobs:
           suite: any
     - uses: gerlero/apt-install@v1
       with:
-        packages: build-essential libhwy-dev liblcms2-dev libjpeg-turbo8-dev libpng-dev cmake ninja-build
+        packages: build-essential libhwy-dev liblcms2-dev libjpeg-turbo8-dev libpng-dev cmake libjpeg-dev zlib1g-dev libgif-dev
     - name: Build
-      run: bash build_ssimulacra
+      run: bash build_shared_library.sh
     - uses: actions/upload-artifact@v4
       with:
         name: ssimulacra2-linux
         path: ./build/**/*.*
-  build_windows:
-    name: Windows MSYS2 / ${{ matrix.msystem }}
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-         - msystem: mingw64
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: Checkout the source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          submodules: true
-          fetch-depth: 1
-
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.msystem }}
-          update: true
-          path-type: inherit
-          install: >-
-            base-devel
-            git
-            procps
-          pacboy: >-
-            cmake:p
-            gtest:p
-            libjpeg-turbo:p
-            libpng:p
-            ninja:p
-            toolchain:p
-            highway:p
-            lcms2:p
-
-      - name: Build
-        run: bash build_ssimulacra
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ssimulacra2-windows-${{ matrix.msystem }}
-          path: ./build/**/*.*

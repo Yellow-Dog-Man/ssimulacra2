@@ -66,15 +66,15 @@ elif [[ "$OS" == "macos" ]]; then
     fi
 fi
 
+# Initialize and update submodules
+echo "Initializing and updating submodules..."
+git submodule update --init --recursive
+
 # Ensure LCMS2 has our CMakeLists.txt
 if [ -d "src/third_party/lcms" ] && [ ! -f "src/third_party/lcms/CMakeLists.txt" ]; then
     echo "Adding CMakeLists.txt for LCMS2..."
     cp lcms2_files/CMakeLists.txt src/third_party/lcms/CMakeLists.txt
 fi
-
-# Initialize and update submodules
-echo "Initializing and updating submodules..."
-git submodule update --init --recursive
 
 echo
 echo "Dependencies setup complete!"

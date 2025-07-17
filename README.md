@@ -203,4 +203,4 @@ The bash script `build_ssimulacra2_from_libjxl_repo` can be used to fetch the co
 
 Edits have been made by ProbablePrime(YDMS), to expose SSIMULACRA 2 as a shared library suitable for C# Interop.
 
-Build edits to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This were mostly focused on CMakeLists.txt.
+Build Pipeline edits to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This was mostly focused on CMakeLists.txt. We welcome any PRs to improve the pipeline.
