@@ -199,8 +199,12 @@ The source code of SSIMULACRA 2 is also part of the `tools` of [libjxl](https://
 
 The bash script `build_ssimulacra2_from_libjxl_repo` can be used to fetch the code and compile only what is needed for SSIMULACRA 2.
 
+## Our Fork
+
+Yellow-Dog-Man's fork was created purely to expoose the CLI functionality as a Shared Library, that can be called from [our .NET project](https://github.com/Yellow-Dog-Man/Ssimulacra2.NET).
+
 ## Shared Library
 
-Edits have been made by ProbablePrime(YDMS), to expose SSIMULACRA 2 as a shared library suitable for C# Interop.
+Edits have been made, to expose SSIMULACRA 2 as a shared library suitable for C# Interop.
 
-Build Pipeline edits to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This was mostly focused on CMakeLists.txt. We welcome any PRs to improve the pipeline.
+The Build Pipeline edits to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This was mostly focused on CMakeLists.txt. We welcome any PRs to improve the pipeline as Cmake is not our strong point.
