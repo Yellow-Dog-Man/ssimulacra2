@@ -35,8 +35,6 @@ Returns a score in range -inf..100, which correlates to subjective visual qualit
   This corresponds to the typical output of `cjxl -d 0.5` / `-q 95` or libjpeg-turbo 4:4:4 quality 95.
 - 100 = mathematically lossless.
 
-
-
 ## How it works
 
 SSIMULACRA 2 is based on the concept of the multi-scale structural similarity index measure (MS-SSIM),
@@ -99,9 +97,6 @@ Changes compared to the [original version (SSIMULACRA 1)](https://github.com/clo
 - removed specific grid-like blockiness detection
 - tuned using a much larger set of subjective opinions (and using absolute quality scores, not just relative comparison results)
 
-
-
-
 ## Metric performance
 
 
@@ -140,7 +135,6 @@ DSSIM | -0.6679 | -0.8561 | -0.6544
 Butteraugli (3-norm) | -0.3846 | -0.543 | -0.4424
 PSNR (ImageMagick) | 0.4876 | 0.6757 | 0.6214
 
-
 KonFiG-IQA: (Experiment I, F boosting, clamping negative JND (better than reference) to zero)
 
 Metric | KRCC | SRCC | PCC |
@@ -155,7 +149,6 @@ SSIMULACRA 2.1 | 0.7668 | 0.9194 | 0.9136 |
 DSSIM | -0.7595 | -0.9147 | -0.673 |
 Butteraugli (3-norm) | -0.771 | -0.9238 | -0.7587 |
 PSNR (ImageMagick) | 0.6531 | 0.8248 | 0.7218 |
-
 
 CID22 full set: (22k subjective scores)
 
@@ -172,7 +165,6 @@ DSSIM | -0.6428 | -0.8399 | -0.7813
 Butteraugli 3-norm | -0.6547 | -0.8387 | -0.7903
 PSNR (ImageMagick) | 0.3472 | 0.5002 | 0.4817
 
-
 CID22 validation set: (4292 subjective scores, not used for tuning)
 
 Metric | KRCC | SRCC | PCC |
@@ -187,8 +179,6 @@ SSIMULACRA 2.1 | 0.7077 | 0.8904 | 0.8787
 DSSIM | -0.6807 | -0.8722 | -0.822
 Butteraugli 3-norm | -0.6102 | -0.7938 | -0.745
 PSNR (ImageMagick) | 0.3491 | 0.4995 | 0.5013
-
-
 
 ## Building
 
@@ -209,4 +199,8 @@ The source code of SSIMULACRA 2 is also part of the `tools` of [libjxl](https://
 
 The bash script `build_ssimulacra2_from_libjxl_repo` can be used to fetch the code and compile only what is needed for SSIMULACRA 2.
 
+## Shared Library
 
+Edits have been made by ProbablePrime(YDMS), to expose SSIMULACRA 2 as a shared library suitable for C# Interop.
+
+Build edits to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This were mostly focused on CMakeLists.txt.

@@ -90,21 +90,21 @@ if(USING_VCPKG)
         set(JPEG_LIBRARIES libjpeg-turbo::turbojpeg)
         set(JPEG_FOUND TRUE)
     endif()
-    
+
     # PNG
     find_package(PNG CONFIG QUIET)
     if(PNG_FOUND)
         message(STATUS "✓ Found PNG via vcpkg")
         set(PNG_LIBRARIES PNG::PNG)
     endif()
-    
+
     # ZLIB
     find_package(ZLIB CONFIG QUIET)
     if(ZLIB_FOUND)
         message(STATUS "✓ Found ZLIB via vcpkg")
         set(ZLIB_LIBRARIES ZLIB::ZLIB)
     endif()
-    
+
     # GIF
     find_package(unofficial-giflib CONFIG QUIET)
     if(unofficial-giflib_FOUND)

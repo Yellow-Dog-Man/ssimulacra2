@@ -26,10 +26,6 @@ if defined VCPKG_ROOT (
         set "VCPKG_TOOLCHAIN=%USERPROFILE%\vcpkg\scripts\buildsystems\vcpkg.cmake"
         set "VCPKG_ROOT=%USERPROFILE%\vcpkg"
         echo Found vcpkg at: %USERPROFILE%\vcpkg
-    ) else if exist "D:\Documents\GitHub\ResoniteDevelopment\vcpkg\scripts\buildsystems\vcpkg.cmake" (
-        set "VCPKG_TOOLCHAIN=D:\Documents\GitHub\ResoniteDevelopment\vcpkg\scripts\buildsystems\vcpkg.cmake"
-        set "VCPKG_ROOT=D:\Documents\GitHub\ResoniteDevelopment\vcpkg"
-        echo Found vcpkg at: D:\Documents\GitHub\ResoniteDevelopment\vcpkg
     ) else (
         echo Warning: vcpkg not found. Image format libraries may not be available.
         echo To use vcpkg, set VCPKG_ROOT environment variable or install vcpkg to C:\vcpkg
@@ -52,15 +48,3 @@ if defined VCPKG_TOOLCHAIN (
 
 REM Build the project
 cmake --build . --config Release
-
-echo.
-echo Build complete!
-echo.
-echo Shared library: build/Release/ssimulacra2.dll
-echo Executable: build/Release/ssimulacra2.exe
-echo.
-echo To test the C# example:
-echo   cd examples/csharp
-echo   dotnet run path/to/original.png path/to/distorted.png
-
-pause

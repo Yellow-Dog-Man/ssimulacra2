@@ -37,4 +37,4 @@ else
 fi
 
 # Build the project
-cmake --build . --config Release -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+cmake --build . --config Release -j4
