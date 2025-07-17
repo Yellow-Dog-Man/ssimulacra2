@@ -69,7 +69,7 @@ fi
 # Ensure LCMS2 has our CMakeLists.txt
 if [ -d "src/third_party/lcms" ] && [ ! -f "src/third_party/lcms/CMakeLists.txt" ]; then
     echo "Adding CMakeLists.txt for LCMS2..."
-    # The CMakeLists.txt should already be created by the main script
+    cp lcms2_files/CMakeLists.txt src/third_party/lcms/CMakeLists.txt
 fi
 
 # Initialize and update submodules
