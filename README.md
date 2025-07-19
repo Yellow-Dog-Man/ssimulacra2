@@ -205,6 +205,6 @@ Yellow-Dog-Man's fork was created purely to expoose the CLI functionality as a S
 
 ## Shared Library
 
-Edits have been made, to expose SSIMULACRA 2 as a shared library suitable for C# Interop.
+Edits have been made, to expose SSIMULACRA 2 as a shared library suitable for C# Interop. This was in order to support the creation of [Ssimulacra2.NET](https://github.com/Yellow-Dog-Man/Ssimulacra2.NET)
 
-The Build Pipeline edits to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This was mostly focused on CMakeLists.txt. We welcome any PRs to improve the pipeline as Cmake is not our strong point.
+The Build Pipeline edits and some of the shared library code to support this were made with [Kiro](https://kiro.dev/) and Claude Sonnet 4.0. This was mostly focused on CMakeLists.txt and we welcome any PRs to improve the pipeline as Cmake is not our strong point.
